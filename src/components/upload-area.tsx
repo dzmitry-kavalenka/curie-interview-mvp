@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File } from "lucide-react";
+import { UploadCloud, File, Loader2, CheckCircle, XCircle } from "lucide-react";
 
 export function UploadArea({
   onFileSelect,
@@ -11,8 +11,45 @@ export function UploadArea({
   onFileSelect?: (file: File) => void;
 }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
+  const [uploadMessage, setUploadMessage] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  async function uploadFile(file: File) {
+    setIsUploading(true);
+    setUploadStatus("idle");
+    setUploadMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setUploadStatus("success");
+        setUploadMessage("File uploaded successfully!");
+        onFileSelect?.(file);
+      } else {
+        setUploadStatus("error");
+        setUploadMessage(result.error || "Upload failed");
+      }
+    } catch (error) {
+      setUploadStatus("error");
+      setUploadMessage("Network error occurred");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
@@ -21,7 +58,7 @@ export function UploadArea({
     const file = e.dataTransfer.files?.[0];
     if (file && file.type === "application/pdf") {
       setSelectedFile(file);
-      onFileSelect?.(file);
+      uploadFile(file);
     }
   }
 
@@ -29,8 +66,14 @@ export function UploadArea({
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
       setSelectedFile(file);
-      onFileSelect?.(file);
+      uploadFile(file);
     }
+  }
+
+  function handleClear() {
+    setSelectedFile(null);
+    setUploadStatus("idle");
+    setUploadMessage("");
   }
 
   return (
@@ -67,15 +110,35 @@ export function UploadArea({
         <div className="mt-4 flex items-center justify-between bg-muted rounded-xl px-4 py-3">
           <div className="flex items-center gap-2 text-sm">
             <File className="w-4 h-4 text-muted-foreground" />
-            <span className="truncate max-w-[80%]">{selectedFile.name}</span>
+            <span className="truncate max-w-[60%]">{selectedFile.name}</span>
+            {isUploading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {uploadStatus === "success" && (
+              <CheckCircle className="w-4 h-4 text-green-500" />
+            )}
+            {uploadStatus === "error" && (
+              <XCircle className="w-4 h-4 text-red-500" />
+            )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSelectedFile(null)}
-          >
-            Clear
-          </Button>
+          <div className="flex items-center gap-2">
+            {uploadMessage && (
+              <span
+                className={cn(
+                  "text-xs",
+                  uploadStatus === "success" ? "text-green-600" : "text-red-600"
+                )}
+              >
+                {uploadMessage}
+              </span>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClear}
+              disabled={isUploading}
+            >
+              Clear
+            </Button>
+          </div>
         </div>
       )}
     </div>
