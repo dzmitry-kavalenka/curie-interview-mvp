@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { UploadArea } from "@/components/upload-area";
 
 export default function Home() {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="text-center mb-8">
@@ -15,19 +12,7 @@ export default function Home() {
         </p>
       </div>
 
-      <UploadArea
-        onFileSelect={(file) => {
-          setUploadedFile(file);
-        }}
-      />
-
-      {uploadedFile && (
-        <div className="mt-6 text-center">
-          <p className="text-green-600 font-medium">
-            PDF uploaded successfully! Ready for processing.
-          </p>
-        </div>
-      )}
+      <UploadArea />
     </div>
   );
 }
