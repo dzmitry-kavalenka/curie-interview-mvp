@@ -1,8 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { UploadArea } from "@/components/upload-area";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="text-center mb-8">
@@ -12,7 +16,11 @@ export default function Home() {
         </p>
       </div>
 
-      <UploadArea />
+      <UploadArea
+        onFileSelect={(file) => {
+          router.push(`/files/${file.filename}`);
+        }}
+      />
     </div>
   );
 }

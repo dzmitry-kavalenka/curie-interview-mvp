@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import { randomUUID } from "crypto";
+
+export interface UploadResponse {
+  message: string;
+  filename: string;
+  originalName: string;
+  size: number;
+  type: string;
+  path: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,9 +46,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate unique filename
-    const timestamp = Date.now();
+    const uuid = randomUUID();
     const originalName = file.name;
-    const uniqueFilename = `${timestamp}-${originalName}`;
+    const uniqueFilename = `${uuid}.pdf`;
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer();

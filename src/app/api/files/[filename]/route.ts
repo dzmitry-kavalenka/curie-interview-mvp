@@ -36,10 +36,11 @@ export async function GET(
 
     // Read file
     const fileBuffer = await readFile(filePath);
+
     // Return file with appropriate headers
     return new NextResponse(Buffer.from(fileBuffer), {
       headers: {
-        "Content-Type": "application/pdf", 
+        "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="${filename}"`,
         "Cache-Control": "public, max-age=3600",
       },

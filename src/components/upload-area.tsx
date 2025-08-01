@@ -4,11 +4,12 @@ import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, File, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { UploadResponse } from "@/app/api/upload/route";
 
 export function UploadArea({
   onFileSelect,
 }: {
-  onFileSelect?: (file: File) => void;
+  onFileSelect?: (file: UploadResponse) => void;
 }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -38,7 +39,7 @@ export function UploadArea({
       if (response.ok) {
         setUploadStatus("success");
         setUploadMessage("File uploaded successfully!");
-        onFileSelect?.(file);
+        onFileSelect?.(result as UploadResponse);
       } else {
         setUploadStatus("error");
         setUploadMessage(result.error || "Upload failed");
