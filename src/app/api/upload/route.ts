@@ -4,6 +4,10 @@ import { join } from "path";
 import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 
+// MVP Configuration - Match summarize route limits
+const MAX_PDF_SIZE_MB = 5; // Maximum PDF size in MB (same as summarize route)
+const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
+
 export interface UploadResponse {
   message: string;
   filename: string;
@@ -22,19 +26,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: "File size too large. Maximum size is 10MB." },
-        { status: 400 }
-      );
-    }
-
     // Validate file type (PDF only)
     if (file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Only PDF files are allowed" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size (5MB limit to match summarize route)
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      return NextResponse.json(
+        {
+          error: `PDF too large. Maximum size is ${MAX_PDF_SIZE_MB}MB. Current size: ${fileSizeMB}MB`,
+        },
         { status: 400 }
       );
     }
@@ -58,13 +64,20 @@ export async function POST(request: NextRequest) {
     const filePath = join(uploadsDir, uniqueFilename);
     await writeFile(filePath, buffer);
 
+    console.log(
+      `File uploaded: ${originalName} -> ${uniqueFilename} (${(
+        file.size /
+        (1024 * 1024)
+      ).toFixed(1)}MB)`
+    );
+
     return NextResponse.json({
       message: "File uploaded successfully",
       filename: uniqueFilename,
       originalName: originalName,
       size: file.size,
       type: file.type,
-      path: `/uploads/${uniqueFilename}`,
+      path: `/api/files/${uniqueFilename}`,
     });
   } catch (error) {
     console.error("Upload error:", error);

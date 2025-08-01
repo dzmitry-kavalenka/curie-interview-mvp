@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, File, Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -39,14 +40,31 @@ export function UploadArea({
       if (response.ok) {
         setUploadStatus("success");
         setUploadMessage("File uploaded successfully!");
+        toast.success("File uploaded successfully!", {
+          description: `${file.name} has been uploaded and is ready for processing.`,
+        });
         onFileSelect?.(result as UploadResponse);
       } else {
         setUploadStatus("error");
-        setUploadMessage(result.error || "Upload failed");
+        const errorMessage = result.error || "Upload failed";
+        setUploadMessage(errorMessage);
+
+        // Show error toast with appropriate styling
+        toast.error("Upload failed", {
+          description: errorMessage,
+          duration: 5000, // Show for 5 seconds
+        });
       }
-    } catch (error) {
+    } catch {
       setUploadStatus("error");
-      setUploadMessage("Network error occurred");
+      const errorMessage =
+        "Network error occurred. Please check your connection and try again.";
+      setUploadMessage(errorMessage);
+
+      toast.error("Network Error", {
+        description: errorMessage,
+        duration: 5000,
+      });
     } finally {
       setIsUploading(false);
     }
@@ -57,24 +75,51 @@ export function UploadArea({
     setIsDragging(false);
 
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type === "application/pdf") {
-      setSelectedFile(file);
-      uploadFile(file);
+    if (!file) {
+      toast.error("No file selected", {
+        description: "Please select a PDF file to upload.",
+      });
+      return;
     }
+
+    if (file.type !== "application/pdf") {
+      toast.error("Invalid file type", {
+        description: "Please select a PDF file. Only PDF files are supported.",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    uploadFile(file);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file && file.type === "application/pdf") {
-      setSelectedFile(file);
-      uploadFile(file);
+    if (!file) {
+      toast.error("No file selected", {
+        description: "Please select a PDF file to upload.",
+      });
+      return;
     }
+
+    if (file.type !== "application/pdf") {
+      toast.error("Invalid file type", {
+        description: "Please select a PDF file. Only PDF files are supported.",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    uploadFile(file);
   }
 
   function handleClear() {
     setSelectedFile(null);
     setUploadStatus("idle");
     setUploadMessage("");
+    toast.info("File cleared", {
+      description: "You can now select a new file.",
+    });
   }
 
   return (
@@ -97,6 +142,9 @@ export function UploadArea({
         <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
         <p className="text-muted-foreground text-sm">
           Drag and drop a PDF here or click to select a file
+        </p>
+        <p className="text-muted-foreground text-xs mt-1">
+          Maximum file size: 5MB
         </p>
         <input
           type="file"

@@ -1,5 +1,22 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Features
+
+- PDF document viewer with interactive panels
+- AI-powered PDF summarization using OpenAI
+- Document annotations and bookmarks
+- Responsive resizable layout
+
+## Environment Setup
+
+Create a `.env.local` file in the root directory with your OpenAI API key:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+You can get an API key from [OpenAI's platform](https://platform.openai.com/api-keys).
+
 ## Getting Started
 
 First, run the development server:

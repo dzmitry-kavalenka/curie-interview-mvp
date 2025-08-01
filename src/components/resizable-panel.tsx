@@ -86,7 +86,7 @@ export function ResizablePanel({
 
       {/* Side Panel */}
       <div
-        className="bg-background border-l border-border"
+        className="bg-background border-l border-border overflow-auto"
         style={{ width: `${sidePanelWidth}px` }}
       >
         {sidePanel}

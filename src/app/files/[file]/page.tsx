@@ -9,14 +9,16 @@ export default async function DocumentPage({
 }) {
   const { file } = await params;
 
+  const fileUrl = `/api/files/${file}`;
+
   return (
     <ResizablePanel
       defaultWidth={320}
       minWidth={240}
       maxWidth={600}
-      sidePanel={<DocumentPanel />}
+      sidePanel={<DocumentPanel fileUrl={fileUrl} />}
     >
-      <PdfViewer fileUrl={`/api/files/${file}`} />
+      <PdfViewer fileUrl={fileUrl} />
     </ResizablePanel>
   );
 }
