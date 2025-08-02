@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { randomUUID } from "crypto";
+import { connectDB, DatabaseService } from "@/lib/db";
 
 // MVP Configuration - Match summarize route limits
 const MAX_PDF_SIZE_MB = 5; // Maximum PDF size in MB (same as summarize route)
@@ -19,6 +20,9 @@ export interface UploadResponse {
 
 export async function POST(request: NextRequest) {
   try {
+    // Connect to database
+    await connectDB();
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
@@ -63,6 +67,18 @@ export async function POST(request: NextRequest) {
     // Save file to uploads directory
     const filePath = join(uploadsDir, uniqueFilename);
     await writeFile(filePath, buffer);
+
+    // Store upload information in MongoDB
+    const uploadData = {
+      filename: uniqueFilename,
+      originalName: originalName,
+      size: file.size,
+      type: file.type,
+      path: `/api/files/${uniqueFilename}`,
+      filePath: filePath,
+    };
+
+    await DatabaseService.createPDFUpload(uploadData);
 
     console.log(
       `File uploaded: ${originalName} -> ${uniqueFilename} (${(

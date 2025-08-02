@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
   Settings,
   Lightbulb,
   CheckCircle,
+  ArrowLeft,
 } from "lucide-react";
 
 // Utility function to extract sections from markdown response
@@ -78,6 +80,12 @@ function SummarySection({
 export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
   const [summary, setSummary] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const router = useRouter();
+
+  const handleBack = () => {
+    // Navigate back to the previous page
+    router.back();
+  };
 
   const generateSummary = async () => {
     if (!fileUrl) {
@@ -143,7 +151,17 @@ export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
     <div className="flex flex-col h-full">
       {/* Fixed Header */}
       <div className="p-4 border-b border-border bg-background sticky top-0 z-10">
-        <h2 className="font-semibold text-lg truncate">Document Viewer</h2>
+        <div className="flex items-center gap-3 mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="h-8 w-8 p-0 hover:bg-muted"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="font-semibold text-lg truncate">Document Viewer</h2>
+        </div>
         <p className="text-sm text-muted-foreground">
           Interactive PDF Analysis
         </p>

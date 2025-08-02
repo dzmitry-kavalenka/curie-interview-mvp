@@ -6,10 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { MAX_PDF_SIZE_MB, MAX_TEXT_LENGTH } from "@/lib/config";
 import { extractTextFromPDF } from "@/lib/pdf-utils";
 import { generateSummary } from "@/lib/openai-client";
-import { SummaryStorage } from "@/lib/storage/summary-storage";
+import { connectDB, DatabaseService } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
+    // Connect to database
+    await connectDB();
+
     const { fileUrl } = await request.json();
 
     if (!fileUrl) {
@@ -30,14 +33,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
     }
 
-    // Check if summary already exists
-    const existingSummary = await SummaryStorage.getSummary(filename);
+    // Check if summary already exists in MongoDB
+    const existingSummary = await DatabaseService.getAISummary(filename);
     if (existingSummary) {
       console.log(`Returning cached summary for ${filename}`);
       return NextResponse.json({
         summary: existingSummary.summary,
         cached: true,
         createdAt: existingSummary.createdAt,
+        processingTime: existingSummary.processingTime,
       });
     }
 
@@ -95,9 +99,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store the summary
-    await SummaryStorage.storeSummary(filename, summary, {
-      createdAt: new Date().toISOString(),
+    // Store the summary in MongoDB
+    await DatabaseService.createAISummary({
+      filename,
+      summary,
       fileSize: pdfBuffer.length,
       textLength: extractedText.length,
       processingTime,
