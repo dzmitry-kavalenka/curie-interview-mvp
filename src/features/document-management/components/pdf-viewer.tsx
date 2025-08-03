@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { PdfPage } from "./pdf-page";
 import { Loader2 } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import { PaginationControls } from "./pagination-controls";
+import { PaginationControls } from "@/shared/components/common/pagination-controls";
+import { logger } from "@/shared/utils/logger";
 
 export function PdfViewer({ fileUrl }: { fileUrl: string }) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
@@ -33,7 +34,7 @@ export function PdfViewer({ fileUrl }: { fileUrl: string }) {
         setPdfDoc(doc);
         setCurrentPage(1);
       } catch (err) {
-        console.error("Error loading PDF:", err);
+        logger.error("Error loading PDF:", err);
         setError("Failed to load PDF");
       } finally {
         setLoading(false);

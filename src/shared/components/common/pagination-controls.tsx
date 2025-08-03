@@ -7,8 +7,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { usePagination } from "@/hooks/use-pagination";
+} from "@/shared/components/ui/pagination";
+import { usePagination } from "@/shared/hooks/use-pagination";
 
 interface PaginationControlsProps {
   totalItems: number;

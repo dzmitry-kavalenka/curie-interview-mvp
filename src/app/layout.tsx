@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import AnimatedLayout from "@/components/animated-layout";
-import { Toaster } from "@/components/ui/sonner";
+import AnimatedLayout from "@/shared/components/layout/animated-layout";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 import "./globals.css";
 

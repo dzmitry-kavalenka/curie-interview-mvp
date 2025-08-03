@@ -2,9 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
+import { logger } from "@/shared/utils/logger";
 import {
   MessageSquare,
   FileText,
@@ -20,62 +26,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-// Utility function to extract sections from markdown response
-function extractSection(text: string, sectionName: string): string {
-  const regex = new RegExp(
-    `## ${sectionName}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`,
-    "i"
-  );
-  const match = text.match(regex);
-  return match ? match[1].trim() : "";
-}
-
-// Simple markdown formatter
-function formatMarkdown(text: string, color: string): string {
-  return text
-    .replace(/\n/g, "<br>")
-    .replace(
-      /^- (.+)$/g,
-      `<div class="flex items-start gap-3 mb-2"><span class="w-2 h-2 ${color} rounded-full mt-2 flex-shrink-0"></span><span>$1</span></div>`
-    )
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/"/g, "&quot;");
-}
-
-// Simple section component
-function SummarySection({
-  title,
-  content,
-  icon: Icon,
-  color,
-}: {
-  title: string;
-  content: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-}) {
-  if (!content) return null;
-
-  return (
-    <div
-      className={`p-4 border border-${color}-200 rounded-xl bg-gradient-to-br from-${color}-50 to-${color}-100/50 shadow-sm hover:shadow-md transition-all duration-200`}
-    >
-      <h4
-        className={`font-semibold text-sm mb-3 flex items-center gap-2 text-${color}-700`}
-      >
-        <Icon className="h-4 w-4" />
-        {title}
-      </h4>
-      <div
-        className={`text-sm text-${color}-900/80 leading-relaxed`}
-        dangerouslySetInnerHTML={{
-          __html: formatMarkdown(content, `bg-${color}-500`),
-        }}
-      />
-    </div>
-  );
-}
+import { extractSection } from "@/shared/utils/markdown-utils";
+import { SummarySection } from "@/shared/components/common/summary-section";
 
 export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
   const [summary, setSummary] = useState<string>("");
@@ -116,7 +68,7 @@ export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
         description: "Your document has been analyzed and summarized.",
       });
     } catch (error) {
-      console.error("Error generating summary:", error);
+      logger.error("Error generating summary:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to generate summary";
 

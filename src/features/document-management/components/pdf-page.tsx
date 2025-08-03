@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
+import { logger } from "@/shared/utils/logger";
 
 interface PdfPageProps {
   pdf: PDFDocumentProxy;
@@ -40,7 +41,7 @@ export function PdfPage({ pdf, pageNumber }: PdfPageProps) {
         await task.promise;
       } catch (err: unknown) {
         if ((err as { name?: string }).name !== "RenderingCancelledException") {
-          console.error("Rendering error:", err);
+          logger.error("Rendering error:", err);
         }
       }
     };

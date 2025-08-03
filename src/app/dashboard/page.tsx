@@ -2,18 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UploadArea } from "@/components/upload-area";
-import { UploadHistory } from "@/components/upload-history";
-import { ResizablePanel } from "@/components/resizable-panel";
+import { UploadArea } from "@/features/document-management/components/upload-area";
+import { UploadHistory } from "@/features/document-management/components/upload-history";
+import { ResizablePanel } from "@/shared/components/layout/resizable-panel";
 import { FileText, Upload, History } from "lucide-react";
 
 export default function Dashboard() {
   const router = useRouter();
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [fileCount, setFileCount] = useState(0);
 
   const handleFileSelect = (filename: string) => {
-    setSelectedFile(filename);
     router.push(`/files/${filename}`);
   };
 

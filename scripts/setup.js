@@ -6,13 +6,14 @@
 
 import { existsSync, writeFileSync } from "fs";
 import { join } from "path";
+import chalk from "chalk";
 
 const envPath = join(process.cwd(), ".env.local");
 
 // Check if .env.local already exists
 if (existsSync(envPath)) {
-  console.log("✅ .env.local already exists");
-  console.log("📝 Make sure you have set your OPENAI_API_KEY");
+  console.log(chalk.green("✅ .env.local already exists"));
+  console.log(chalk.blue("📝 Make sure you have set your OPENAI_API_KEY"));
   process.exit(0);
 }
 
@@ -31,12 +32,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 try {
   writeFileSync(envPath, envContent);
-  console.log("✅ .env.local file created successfully!");
-  console.log("📝 Next steps:");
-  console.log("1. Edit .env.local and add your OpenAI API key");
-  console.log("2. Run 'npm run docker:up' to start MongoDB");
-  console.log("3. Run 'npm run dev' to start the development server");
-  console.log("4. Open http://localhost:3000 in your browser");
+  console.log(chalk.green("✅ .env.local file created successfully!"));
+  console.log(chalk.blue("📝 Next steps:"));
+  console.log(chalk.cyan("1. Edit .env.local and add your OpenAI API key"));
+  console.log(chalk.cyan("2. Run 'npm run docker:up' to start MongoDB"));
+  console.log(
+    chalk.cyan("3. Run 'npm run dev' to start the development server")
+  );
+  console.log(chalk.cyan("4. Open http://localhost:3000 in your browser"));
 } catch (error) {
-  console.error("❌ Error creating .env.local file:", error.message);
+  console.error(chalk.red("❌ Error creating .env.local file:"), error.message);
 }

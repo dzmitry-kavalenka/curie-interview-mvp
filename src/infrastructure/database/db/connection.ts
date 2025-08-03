@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
+import { logger } from "@/shared/utils/logger";
 
-// MongoDB connection string - you'll need to set this in your environment variables
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/curie-interview-mvp";
 
@@ -8,7 +8,7 @@ const MONGODB_URI =
 export async function connectDB() {
   try {
     if (mongoose.connection.readyState === 1) {
-      console.log("MongoDB already connected");
+      logger.database("MongoDB already connected");
       return;
     }
 
@@ -23,9 +23,9 @@ export async function connectDB() {
     };
 
     await mongoose.connect(MONGODB_URI, options);
-    console.log("MongoDB connected successfully");
+    logger.database("MongoDB connected successfully");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    logger.error("MongoDB connection error:", error);
     throw error;
   }
 }
@@ -34,8 +34,8 @@ export async function connectDB() {
 export async function disconnectDB() {
   try {
     await mongoose.disconnect();
-    console.log("MongoDB disconnected");
+    logger.database("MongoDB disconnected");
   } catch (error) {
-    console.error("MongoDB disconnection error:", error);
+    logger.error("MongoDB disconnection error:", error);
   }
 }

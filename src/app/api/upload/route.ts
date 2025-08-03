@@ -3,7 +3,8 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { randomUUID } from "crypto";
-import { connectDB, DatabaseService } from "@/lib/db";
+import { connectDB, DocumentService } from "@/infrastructure/database/db";
+import { logger } from "@/shared/utils/logger";
 
 // MVP Configuration - Match summarize route limits
 const MAX_PDF_SIZE_MB = 5; // Maximum PDF size in MB (same as summarize route)
@@ -78,14 +79,13 @@ export async function POST(request: NextRequest) {
       filePath: filePath,
     };
 
-    await DatabaseService.createPDFUpload(uploadData);
+    await DocumentService.createUpload(uploadData);
 
-    console.log(
-      `File uploaded: ${originalName} -> ${uniqueFilename} (${(
-        file.size /
-        (1024 * 1024)
-      ).toFixed(1)}MB)`
-    );
+    logger.upload(`File uploaded: ${originalName} -> ${uniqueFilename}`, {
+      originalName,
+      filename: uniqueFilename,
+      size: `${(file.size / (1024 * 1024)).toFixed(1)}MB`,
+    });
 
     return NextResponse.json({
       message: "File uploaded successfully",
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       path: `/api/files/${uniqueFilename}`,
     });
   } catch (error) {
-    console.error("Upload error:", error);
+    logger.error("Upload error:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },
       { status: 500 }

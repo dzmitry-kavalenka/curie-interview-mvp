@@ -5,9 +5,10 @@ import {
   OPENAI_MODEL,
   OPENAI_MAX_TOKENS,
   OPENAI_TEMPERATURE,
-} from "./config";
+} from "@/shared/config/config";
 import { delay } from "./pdf-utils";
 import { SUMMARY_SYSTEM_PROMPT, SUMMARY_USER_PROMPT_TEMPLATE } from "./prompts";
+import { logger } from "@/shared/utils/logger";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -40,7 +41,7 @@ export async function generateSummary(
 
     // Retry on rate limit errors
     if (rateLimitError?.status === 429 && retryCount < MAX_RETRIES) {
-      console.log(
+      logger.ai(
         `Rate limit hit, retrying in ${RETRY_DELAY_MS}ms (attempt ${
           retryCount + 1
         }/${MAX_RETRIES})`

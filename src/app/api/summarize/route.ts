@@ -3,10 +3,11 @@ import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
-import { MAX_PDF_SIZE_MB, MAX_TEXT_LENGTH } from "@/lib/config";
-import { extractTextFromPDF } from "@/lib/pdf-utils";
-import { generateSummary } from "@/lib/openai-client";
-import { connectDB, DatabaseService } from "@/lib/db";
+import { MAX_PDF_SIZE_MB, MAX_TEXT_LENGTH } from "@/shared/config/config";
+import { extractTextFromPDF } from "@/infrastructure/external-services/pdf-utils";
+import { generateSummary } from "@/infrastructure/external-services/openai-client";
+import { connectDB, SummaryService } from "@/infrastructure/database/db";
+import { logger } from "@/shared/utils/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,9 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if summary already exists in MongoDB
-    const existingSummary = await DatabaseService.getAISummary(filename);
+    const existingSummary = await SummaryService.getSummary(filename);
     if (existingSummary) {
-      console.log(`Returning cached summary for ${filename}`);
+      logger.summary(`Returning cached summary for ${filename}`);
       return NextResponse.json({
         summary: existingSummary.summary,
         cached: true,
@@ -81,11 +82,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(
-      `Processing PDF: ${filename} (${fileSizeMB.toFixed(
-        1
-      )}MB, ${extractedText.length.toLocaleString()} characters)`
-    );
+    logger.summary(`Processing PDF: ${filename}`, {
+      filename,
+      fileSize: `${fileSizeMB.toFixed(1)}MB`,
+      textLength: `${extractedText.length.toLocaleString()} characters`,
+    });
 
     // Generate summary with timing
     const startTime = Date.now();
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store the summary in MongoDB
-    await DatabaseService.createAISummary({
+    await SummaryService.createSummary({
       filename,
       summary,
       fileSize: pdfBuffer.length,
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       processingTime,
     });
   } catch (error) {
-    console.error("Error generating summary:", error);
+    logger.error("Error generating summary:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

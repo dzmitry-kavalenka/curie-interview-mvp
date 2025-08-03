@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB, DatabaseService } from "@/lib/db";
+import { connectDB, FileService } from "@/infrastructure/database/db";
+import { logger } from "@/shared/utils/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
     const skip = parseInt(searchParams.get("skip") || "0");
 
     // Get all files with their summaries
-    const filesWithSummaries = await DatabaseService.getAllFilesWithSummaries(
+    const filesWithSummaries = await FileService.getAllFilesWithSummaries(
       limit,
       skip
     );
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
       skip,
     });
   } catch (error) {
-    console.error("Error fetching uploads:", error);
+    logger.error("Error fetching uploads:", error);
     return NextResponse.json(
       { error: "Failed to fetch uploads" },
       { status: 500 }
