@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { logger } from "@/shared/utils/logger";
 
 const MONGODB_URI =

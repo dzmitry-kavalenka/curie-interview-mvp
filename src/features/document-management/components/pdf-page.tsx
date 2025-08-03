@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
+import { useEffect, useRef } from "react";
+
 import { logger } from "@/shared/utils/logger";
 
 interface PdfPageProps {

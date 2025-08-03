@@ -1,5 +1,5 @@
-import { PdfViewer } from "@/features/document-management/components/pdf-viewer";
 import { DocumentPanel } from "@/features/document-management/components/document-panel";
+import { PdfViewer } from "@/features/document-management/components/pdf-viewer";
 import { ResizablePanel } from "@/shared/components/layout/resizable-panel";
 
 export default async function DocumentPage({

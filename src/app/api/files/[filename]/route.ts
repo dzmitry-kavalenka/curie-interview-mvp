@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { existsSync } from "fs";
+
+import { NextRequest, NextResponse } from "next/server";
+
 import { logger } from "@/shared/utils/logger";
 
 export async function GET(

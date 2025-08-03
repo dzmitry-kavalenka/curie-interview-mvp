@@ -1,12 +1,13 @@
-import { join } from "path";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
+import { join } from "path";
+
 import { NextRequest, NextResponse } from "next/server";
 
-import { MAX_PDF_SIZE_MB, MAX_TEXT_LENGTH } from "@/shared/config/config";
-import { extractTextFromPDF } from "@/infrastructure/external-services/pdf-utils";
-import { generateSummary } from "@/infrastructure/external-services/openai-client";
 import { connectDB, SummaryService } from "@/infrastructure/database/db";
+import { generateSummary } from "@/infrastructure/external-services/openai-client";
+import { extractTextFromPDF } from "@/infrastructure/external-services/pdf-utils";
+import { MAX_PDF_SIZE_MB, MAX_TEXT_LENGTH } from "@/shared/config/config";
 import { logger } from "@/shared/utils/logger";
 
 export async function POST(request: NextRequest) {

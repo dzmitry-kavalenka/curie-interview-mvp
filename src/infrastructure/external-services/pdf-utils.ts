@@ -1,9 +1,10 @@
 import pdfParser from "pdf-parse";
+
 import { logger } from "@/shared/utils/logger";
 
 // Utility function to delay execution
 export function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {

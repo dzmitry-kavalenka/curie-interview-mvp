@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { LoadingState } from "@/shared/components/common/loading-state";
-import { ErrorState } from "@/shared/components/common/error-state";
+
 import { EmptyState } from "@/shared/components/common/empty-state";
-import { FileCard } from "./file-card";
+import { ErrorState } from "@/shared/components/common/error-state";
+import { LoadingState } from "@/shared/components/common/loading-state";
+
 import { useFiles } from "../hooks/use-files";
+
+import { FileCard } from "./file-card";
 
 interface UploadHistoryProps {
   onFileSelect?: (filename: string) => void;
@@ -66,7 +69,7 @@ export function UploadHistory({
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-2">
-          {files.map((file) => (
+          {files.map(file => (
             <FileCard
               key={file.upload._id}
               file={file}

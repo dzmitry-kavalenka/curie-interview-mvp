@@ -1,11 +1,12 @@
 "use client";
 
+import { UploadCloud, File, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-import { cn } from "@/shared/utils/utils";
-import { Button } from "@/shared/components/ui/button";
-import { UploadCloud, File, Loader2, CheckCircle, XCircle } from "lucide-react";
+
 import { UploadResponse } from "@/app/api/upload/route";
+import { Button } from "@/shared/components/ui/button";
+import { cn } from "@/shared/utils/utils";
 
 export function UploadArea({
   onFileSelect,
@@ -131,7 +132,7 @@ export function UploadArea({
             ? "border-blue-500 bg-blue-50"
             : "border-muted hover:border-primary/50"
         )}
-        onDragOver={(e) => {
+        onDragOver={e => {
           e.preventDefault();
           setIsDragging(true);
         }}

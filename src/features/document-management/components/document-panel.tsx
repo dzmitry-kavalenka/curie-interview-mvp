@@ -1,16 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/components/ui/tabs";
-import { toast } from "sonner";
-import { Button } from "@/shared/components/ui/button";
-import { logger } from "@/shared/utils/logger";
 import {
   MessageSquare,
   FileText,
@@ -25,9 +14,20 @@ import {
   CheckCircle,
   ArrowLeft,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { extractSection } from "@/shared/utils/markdown-utils";
 import { SummarySection } from "@/shared/components/common/summary-section";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { logger } from "@/shared/utils/logger";
+import { extractSection } from "@/shared/utils/markdown-utils";
 
 export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
   const [summary, setSummary] = useState<string>("");

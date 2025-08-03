@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { FileText, Clock, Trash2, Eye } from "lucide-react";
+
 import { Button } from "@/shared/components/ui/button";
 
 interface UploadRecord {
@@ -103,7 +104,7 @@ export function FileCard({
           <Button
             size="sm"
             variant="ghost"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onSelect(file.upload.filename);
             }}
@@ -114,7 +115,7 @@ export function FileCard({
           <Button
             size="sm"
             variant="ghost"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onDelete(file.upload.filename);
             }}

@@ -1,5 +1,5 @@
-import { PDFUploadService } from "../db/models/pdf-upload";
 import { AISummaryService } from "../db/models/ai-summary";
+import { PDFUploadService } from "../db/models/pdf-upload";
 
 export interface FileWithSummary {
   upload: unknown;
@@ -28,12 +28,12 @@ export class FileService {
 
     // Create a map of summaries by filename for efficient lookup
     const summaryMap = new Map();
-    summaries.forEach((summary) => {
+    summaries.forEach(summary => {
       summaryMap.set(summary.filename, summary);
     });
 
     // Combine uploads with their summaries
-    return uploads.map((upload) => ({
+    return uploads.map(upload => ({
       upload,
       summary: summaryMap.get(upload.filename) || null,
     }));

@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PdfPage } from "./pdf-page";
 import { Loader2 } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
+import { useEffect, useState } from "react";
+
 import { PaginationControls } from "@/shared/components/common/pagination-controls";
 import { logger } from "@/shared/utils/logger";
+
+import { PdfPage } from "./pdf-page";
 
 export function PdfViewer({ fileUrl }: { fileUrl: string }) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);

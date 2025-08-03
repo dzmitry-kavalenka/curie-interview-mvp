@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { existsSync } from "fs";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { existsSync } from "fs";
-import { randomUUID } from "crypto";
+
+import { NextRequest, NextResponse } from "next/server";
+
 import { connectDB, DocumentService } from "@/infrastructure/database/db";
 import { logger } from "@/shared/utils/logger";
 

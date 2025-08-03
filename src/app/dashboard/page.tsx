@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { FileText, Upload, History } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { UploadArea } from "@/features/document-management/components/upload-area";
 import { UploadHistory } from "@/features/document-management/components/upload-history";
 import { ResizablePanel } from "@/shared/components/layout/resizable-panel";
-import { FileText, Upload, History } from "lucide-react";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -68,7 +69,7 @@ export default function Dashboard() {
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <UploadArea
-              onFileSelect={(file) => {
+              onFileSelect={file => {
                 router.push(`/files/${file.filename}`);
               }}
             />

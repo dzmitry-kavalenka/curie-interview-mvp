@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+
 import {
   MAX_RETRIES,
   RETRY_DELAY_MS,
@@ -6,9 +7,10 @@ import {
   OPENAI_MAX_TOKENS,
   OPENAI_TEMPERATURE,
 } from "@/shared/config/config";
+import { logger } from "@/shared/utils/logger";
+
 import { delay } from "./pdf-utils";
 import { SUMMARY_SYSTEM_PROMPT, SUMMARY_USER_PROMPT_TEMPLATE } from "./prompts";
-import { logger } from "@/shared/utils/logger";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
