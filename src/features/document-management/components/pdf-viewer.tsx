@@ -9,7 +9,21 @@ import { logger } from "@/shared/utils/logger";
 
 import { PdfPage } from "./pdf-page";
 
-export function PdfViewer({ fileUrl }: { fileUrl: string }) {
+export function PdfViewer({
+  fileUrl,
+  onTextSelect,
+  onPageChange,
+  fileId,
+  fileName,
+  onAnnotationCreated,
+}: {
+  fileUrl: string;
+  onTextSelect?: (text: string) => void;
+  onPageChange?: (page: number) => void;
+  fileId?: string;
+  fileName?: string;
+  onAnnotationCreated?: () => void;
+}) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,8 +42,9 @@ export function PdfViewer({ fileUrl }: { fileUrl: string }) {
         const pdfjs = await import("pdfjs-dist");
         const { getDocument, GlobalWorkerOptions } = pdfjs;
 
-        // Use the real worker from public folder
-        GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+        // Use jsDelivr CDN for PDF.js worker
+        GlobalWorkerOptions.workerSrc =
+          "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.54/build/pdf.worker.min.mjs";
 
         const loadingTask = getDocument(fileUrl);
         const doc = await loadingTask.promise;
@@ -48,6 +63,7 @@ export function PdfViewer({ fileUrl }: { fileUrl: string }) {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    onPageChange?.(page);
   };
 
   if (error) {
@@ -74,7 +90,14 @@ export function PdfViewer({ fileUrl }: { fileUrl: string }) {
       {/* PDF Page Container - Takes up available space */}
       <div className="flex-1 overflow-auto p-4">
         <div className="flex justify-center">
-          <PdfPage pageNumber={currentPage} pdf={pdfDoc} />
+          <PdfPage
+            pageNumber={currentPage}
+            pdf={pdfDoc}
+            onTextSelect={onTextSelect}
+            fileId={fileId}
+            fileName={fileName}
+            onAnnotationCreated={onAnnotationCreated}
+          />
         </div>
       </div>
 

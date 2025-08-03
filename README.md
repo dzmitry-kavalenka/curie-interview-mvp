@@ -1,15 +1,33 @@
 # Curie Interview MVP
 
-A simple PDF upload and AI summarization application built with Next.js, MongoDB, and OpenAI.
+A modern document management and AI summarization application built with Next.js, TypeScript, and Tailwind CSS.
 
 ## Features
 
-. PDF file upload and storage
-. AI-powered text extraction and summarization
-. File history and management
-. Modern, responsive UI with drag-and-drop upload
+. **Document Upload & Management**: Upload PDF files and manage them in a clean interface
+. **AI-Powered Summarization**: Get intelligent summaries of your documents using OpenAI
+. **PDF Text Selection**: Select and copy text from PDF documents with full keyboard support
+. **Responsive Design**: Works seamlessly across desktop and mobile devices
+. **Modern UI**: Built with shadcn/ui components and Tailwind CSS
 
-## Quick Start
+## PDF Text Selection
+
+The PDF viewer now supports text selection with the following features:
+
+. **Mouse Selection**: Click and drag to select text in PDF documents
+. **Keyboard Support**: Use keyboard shortcuts for text selection
+. **Copy to Clipboard**: One-click copying of selected text
+. **Clear Selection**: Clear current selection with the X button or Escape key
+. **Visual Feedback**: Selected text is displayed in a dedicated panel
+
+### Text Selection Controls
+
+. **Copy Button**: Copy selected text to clipboard
+. **Clear Button (X)**: Clear current selection
+. **Escape Key**: Clear selection and close the selection panel
+. **Mouse Drag**: Select text by clicking and dragging over the desired area
+
+## Getting Started
 
 ### Prerequisites
 

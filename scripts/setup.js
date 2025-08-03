@@ -6,6 +6,7 @@
 
 import { existsSync, writeFileSync } from "fs";
 import { join } from "path";
+
 import chalk from "chalk";
 
 const envPath = join(process.cwd(), ".env.local");
@@ -28,6 +29,9 @@ MONGODB_URI=mongodb://localhost:27017/curie-interview-mvp
 # Application Configuration
 NODE_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# PDF.js worker cdn
+PDFJS_WORKER_CDN=/pdf.worker.min.mjs
 `;
 
 try {

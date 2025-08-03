@@ -3,19 +3,18 @@
 import {
   MessageSquare,
   FileText,
-  Bookmark,
-  Plus,
   Clock,
-  User,
   Loader2,
   Target,
   Settings,
   Lightbulb,
   CheckCircle,
   ArrowLeft,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 
 import { SummarySection } from "@/shared/components/common/summary-section";
@@ -29,13 +28,73 @@ import {
 import { logger } from "@/shared/utils/logger";
 import { extractSection } from "@/shared/utils/markdown-utils";
 
-export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
+interface Annotation {
+  _id: string;
+  fileId: string;
+  fileName: string;
+  pageNumber: number;
+  selectedText: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DocumentPanelProps {
+  fileUrl?: string;
+  fileId?: string;
+  refreshTrigger?: number;
+}
+
+export function DocumentPanel({
+  fileUrl,
+  fileId,
+  refreshTrigger,
+}: DocumentPanelProps) {
   const [summary, setSummary] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [isLoadingAnnotations, setIsLoadingAnnotations] = useState(false);
+  const [editingAnnotation, setEditingAnnotation] = useState<string | null>(
+    null
+  );
   const router = useRouter();
 
+  const loadAnnotations = useCallback(async () => {
+    if (!fileId) return;
+
+    setIsLoadingAnnotations(true);
+    try {
+      const response = await fetch(`/api/annotations?fileId=${fileId}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load annotations");
+      }
+
+      setAnnotations(data.annotations);
+    } catch (error) {
+      logger.error("Error loading annotations:", error);
+      toast.error("Failed to load annotations");
+    } finally {
+      setIsLoadingAnnotations(false);
+    }
+  }, [fileId]);
+
+  // Load annotations when fileId changes
+  useEffect(() => {
+    if (fileId) {
+      loadAnnotations();
+    }
+  }, [fileId, loadAnnotations]);
+
+  // Refresh annotations when refreshTrigger changes
+  useEffect(() => {
+    if (fileId && refreshTrigger) {
+      loadAnnotations();
+    }
+  }, [refreshTrigger, loadAnnotations, fileId]);
+
   const handleBack = () => {
-    // Navigate back to the previous page
     router.back();
   };
 
@@ -99,6 +158,65 @@ export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
     }
   };
 
+  const handleUpdateAnnotation = async (annotationId: string, note: string) => {
+    try {
+      const response = await fetch(`/api/annotations/${annotationId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ note }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update annotation");
+      }
+
+      setAnnotations(prev =>
+        prev.map(ann => (ann._id === annotationId ? data.annotation : ann))
+      );
+      setEditingAnnotation(null);
+      toast.success("Annotation updated successfully!");
+    } catch (error) {
+      logger.error("Error updating annotation:", error);
+      toast.error("Failed to update annotation");
+    }
+  };
+
+  const handleDeleteAnnotation = async (annotationId: string) => {
+    try {
+      const response = await fetch(`/api/annotations/${annotationId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete annotation");
+      }
+
+      setAnnotations(prev => prev.filter(ann => ann._id !== annotationId));
+      toast.success("Annotation deleted successfully!");
+    } catch (error) {
+      logger.error("Error deleting annotation:", error);
+      toast.error("Failed to delete annotation");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    if (diffInMinutes < 1440)
+      return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Fixed Header */}
@@ -128,10 +246,6 @@ export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
           <TabsTrigger value="annotations" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             Notes
-          </TabsTrigger>
-          <TabsTrigger value="bookmarks" className="flex items-center gap-2">
-            <Bookmark className="h-4 w-4" />
-            Bookmarks
           </TabsTrigger>
         </TabsList>
 
@@ -211,131 +325,113 @@ export function DocumentPanel({ fileUrl }: { fileUrl?: string }) {
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium">Annotations & Notes</h3>
-                <Button size="sm" variant="outline">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Note
-                </Button>
+                <div className="text-xs text-muted-foreground">
+                  Select text in the PDF to create annotations
+                </div>
               </div>
 
+              {/* Existing Annotations */}
               <div className="space-y-3">
-                <div className="p-3 border border-border rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      Page 1
-                    </span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />2 min ago
-                    </span>
+                {isLoadingAnnotations ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
-                  <p className="text-sm mb-2">
-                    Important section about project requirements
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <User className="h-3 w-3" />
-                      John Doe
-                    </div>
-                    <div className="flex gap-1">
-                      <span className="text-xs bg-muted px-2 py-1 rounded">
-                        important
-                      </span>
-                      <span className="text-xs bg-muted px-2 py-1 rounded">
-                        requirements
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-3 border border-border rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      Page 3
-                    </span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />5 min ago
-                    </span>
-                  </div>
-                  <p className="text-sm mb-2">
-                    Need to review this calculation
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <User className="h-3 w-3" />
-                      Jane Smith
-                    </div>
-                    <div className="flex gap-1">
-                      <span className="text-xs bg-muted px-2 py-1 rounded">
-                        review
-                      </span>
-                      <span className="text-xs bg-muted px-2 py-1 rounded">
-                        calculation
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="bookmarks" className="h-full">
-            <div className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Bookmarks</h3>
-                <Button size="sm" variant="outline">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Bookmark
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-start justify-between p-3 hover:bg-muted/30 rounded-lg cursor-pointer transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Bookmark className="h-4 w-4 text-primary" />
-                      <p className="text-sm font-medium">Introduction</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Document overview and objectives
+                ) : annotations.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No annotations yet</p>
+                    <p className="text-xs">
+                      Select text in the PDF to create your first note
                     </p>
-                    <span className="text-xs bg-muted px-2 py-1 rounded">
-                      Page 1
-                    </span>
                   </div>
-                </div>
+                ) : (
+                  annotations.map(annotation => (
+                    <div
+                      key={annotation._id}
+                      className="p-3 border border-border rounded-lg hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
+                          <FileText className="h-3 w-3" />
+                          Page {annotation.pageNumber}
+                        </span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatDate(annotation.createdAt)}
+                        </span>
+                      </div>
 
-                <div className="flex items-start justify-between p-3 hover:bg-muted/30 rounded-lg cursor-pointer transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Bookmark className="h-4 w-4 text-primary" />
-                      <p className="text-sm font-medium">
-                        Technical Requirements
-                      </p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      System architecture and specifications
-                    </p>
-                    <span className="text-xs bg-muted px-2 py-1 rounded">
-                      Page 5
-                    </span>
-                  </div>
-                </div>
+                      <div className="mb-2">
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Selected Text:
+                        </div>
+                        <div className="text-xs bg-muted/50 p-2 rounded mb-2 max-h-16 overflow-y-auto">
+                          {annotation.selectedText}
+                        </div>
+                      </div>
 
-                <div className="flex items-start justify-between p-3 hover:bg-muted/30 rounded-lg cursor-pointer transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Bookmark className="h-4 w-4 text-primary" />
-                      <p className="text-sm font-medium">Conclusion</p>
+                      {editingAnnotation === annotation._id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={annotation.note}
+                            onChange={e => {
+                              setAnnotations(prev =>
+                                prev.map(ann =>
+                                  ann._id === annotation._id
+                                    ? { ...ann, note: e.target.value }
+                                    : ann
+                                )
+                              );
+                            }}
+                            className="w-full p-2 text-sm border rounded resize-none"
+                            rows={3}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleUpdateAnnotation(
+                                  annotation._id,
+                                  annotation.note
+                                )
+                              }
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingAnnotation(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm mb-2">{annotation.note}</p>
+                      )}
+
+                      <div className="flex gap-1 mt-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingAnnotation(annotation._id)}
+                          className="h-6 px-2"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteAnnotation(annotation._id)}
+                          className="h-6 px-2 text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Summary and next steps
-                    </p>
-                    <span className="text-xs bg-muted px-2 py-1 rounded">
-                      Page 12
-                    </span>
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
             </div>
           </TabsContent>
