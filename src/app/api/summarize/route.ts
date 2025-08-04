@@ -1,12 +1,9 @@
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
-import { join } from "path";
-
 import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB, SummaryService } from "@/infrastructure/database/db";
 import { generateSummary } from "@/infrastructure/external-services/openai-client";
 import { extractTextFromPDF } from "@/infrastructure/external-services/pdf-utils";
+import { storageService } from "@/infrastructure/external-services/storage-service";
 import { MAX_PDF_SIZE_MB, MAX_TEXT_LENGTH } from "@/shared/config/config";
 import { logger } from "@/shared/utils/logger";
 
@@ -47,19 +44,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check if file exists
-    const uploadsDir =
-      process.env.NODE_ENV === "production"
-        ? "/tmp/uploads"
-        : join(process.cwd(), "uploads");
-    const filePath = join(uploadsDir, filename);
-
-    if (!existsSync(filePath)) {
+    // Get file buffer using storage service
+    let pdfBuffer: Buffer;
+    try {
+      pdfBuffer = await storageService.getLocalFileBuffer(filename);
+    } catch {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
-
-    // Check file size
-    const pdfBuffer = await readFile(filePath);
     const fileSizeMB = pdfBuffer.length / (1024 * 1024);
 
     if (fileSizeMB > MAX_PDF_SIZE_MB) {
