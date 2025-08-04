@@ -16,19 +16,28 @@ A modern document management and AI summarization application built with Next.js
    npm run setup
    ```
 
-3. **Start MongoDB**
+3. **Configure AWS S3 (for production PDF storage)**
+
+   ```bash
+   npm run setup:s3
+   ```
+
+   Follow the guide to set up your S3 bucket and add credentials to `.env`
+   Note: S3 is only required for production. Development uses local storage.
+
+4. **Start MongoDB**
 
    ```bash
    npm run docker:up
    ```
 
-4. **Start development server**
+5. **Start development server**
 
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
+6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Documentation

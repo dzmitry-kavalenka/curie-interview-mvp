@@ -6,7 +6,9 @@ export interface PDFUploadData {
   size: number;
   type: string;
   path: string;
-  filePath: string;
+  filePath?: string;
+  s3Key?: string;
+  s3Url?: string;
 }
 
 export class DocumentService {

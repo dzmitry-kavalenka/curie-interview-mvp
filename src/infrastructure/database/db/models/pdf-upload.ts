@@ -32,7 +32,15 @@ const pdfUploadSchema = new mongoose.Schema(
     },
     filePath: {
       type: String,
-      required: true,
+      required: false, // Optional for S3 storage
+    },
+    s3Key: {
+      type: String,
+      required: false, // For S3 storage
+    },
+    s3Url: {
+      type: String,
+      required: false, // For S3 storage
     },
   },
   {
@@ -52,7 +60,9 @@ export class PDFUploadService {
     size: number;
     type: string;
     path: string;
-    filePath: string;
+    filePath?: string;
+    s3Key?: string;
+    s3Url?: string;
   }) {
     const upload = new PDFUpload(data);
     return await upload.save();

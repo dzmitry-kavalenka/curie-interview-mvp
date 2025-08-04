@@ -1,11 +1,9 @@
 import { randomUUID } from "crypto";
-import { existsSync } from "fs";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB, DocumentService } from "@/infrastructure/database/db";
+import { storageService } from "@/infrastructure/external-services/storage-service";
 import { logger } from "@/shared/utils/logger";
 
 // MVP Configuration - Match summarize route limits
@@ -52,16 +50,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir =
-      process.env.NODE_ENV === "production"
-        ? "/tmp/uploads"
-        : join(process.cwd(), "uploads");
-
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-
     // Generate unique filename
     const uuid = randomUUID();
     const originalName = file.name;
@@ -71,9 +59,11 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save file to uploads directory
-    const filePath = join(uploadsDir, uniqueFilename);
-    await writeFile(filePath, buffer);
+    const uploadResult = await storageService.uploadFile(
+      uniqueFilename,
+      buffer,
+      file.type
+    );
 
     // Store upload information in MongoDB
     const uploadData = {
@@ -82,7 +72,8 @@ export async function POST(request: NextRequest) {
       size: file.size,
       type: file.type,
       path: `/api/files/${uniqueFilename}`,
-      filePath: filePath,
+      s3Key: uploadResult.key,
+      s3Url: uploadResult.url,
     };
 
     await DocumentService.createUpload(uploadData);

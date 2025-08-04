@@ -1,9 +1,7 @@
-import { existsSync } from "fs";
-import { readFile } from "fs/promises";
-import { join } from "path";
-
 import { NextRequest, NextResponse } from "next/server";
 
+import { connectDB, DocumentService } from "@/infrastructure/database/db";
+import { storageService } from "@/infrastructure/external-services/storage-service";
 import { logger } from "@/shared/utils/logger";
 
 export async function GET(
@@ -20,7 +18,6 @@ export async function GET(
       );
     }
 
-    // Validate filename to prevent directory traversal
     if (
       filename.includes("..") ||
       filename.includes("/") ||
@@ -29,28 +26,33 @@ export async function GET(
       return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
     }
 
-    const uploadsDir =
-      process.env.NODE_ENV === "production"
-        ? "/tmp/uploads"
-        : join(process.cwd(), "uploads");
-    const filePath = join(uploadsDir, filename);
+    // Connect to database to get file info
+    await connectDB();
 
-    // Check if file exists
-    if (!existsSync(filePath)) {
+    // Get file information from database
+    const fileInfo = await DocumentService.getUpload(filename);
+
+    if (!fileInfo) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Read file
-    const fileBuffer = await readFile(filePath);
+    const fileUrl = await storageService.getFileUrl(filename);
 
-    // Return file with appropriate headers
-    return new NextResponse(Buffer.from(fileBuffer), {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${filename}"`,
-        "Cache-Control": "public, max-age=3600",
-      },
-    });
+    if (process.env.NODE_ENV === "production") {
+      // Redirect to S3 signed URL in production
+      return NextResponse.redirect(fileUrl);
+    } else {
+      // Serve local file in development
+      const fileBuffer = await storageService.getLocalFileBuffer(filename);
+
+      return new NextResponse(Buffer.from(fileBuffer), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `inline; filename="${filename}"`,
+          "Cache-Control": "public, max-age=3600",
+        },
+      });
+    }
   } catch (error) {
     logger.error("File fetch error:", error);
     return NextResponse.json(
