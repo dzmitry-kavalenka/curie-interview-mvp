@@ -55,13 +55,24 @@ export function useFiles() {
 
   const deleteFile = async (filename: string) => {
     try {
-      await deleteFileAction(filename);
+      const result = await deleteFileAction(filename);
 
       setFiles(prev => prev.filter(file => file.upload.filename !== filename));
       if (selectedFile === filename) {
         setSelectedFile(null);
       }
-      toast.success("File deleted successfully");
+
+      // Show appropriate success message based on deletion results
+      if (result.s3Deleted === false) {
+        toast.success("File deleted from database", {
+          description:
+            "File removed from database but S3 deletion may have failed.",
+        });
+      } else {
+        toast.success("File deleted successfully", {
+          description: "File removed from database and storage.",
+        });
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to delete file";

@@ -43,8 +43,18 @@ export class StorageService {
     if (this.isProduction) {
       const s3Key = `uploads/${filename}`;
       await s3Service.deleteFile(s3Key);
+      logger.info(`File deleted from S3: ${filename}`);
     } else {
       logger.info(`Local file deletion not implemented: ${filename}`);
+    }
+  }
+
+  async deleteFileByKey(s3Key: string): Promise<void> {
+    if (this.isProduction) {
+      await s3Service.deleteFile(s3Key);
+      logger.info(`File deleted from S3 by key: ${s3Key}`);
+    } else {
+      logger.info(`Local file deletion not implemented for key: ${s3Key}`);
     }
   }
 

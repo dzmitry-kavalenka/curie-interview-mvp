@@ -6,6 +6,7 @@ import {
   SummaryService,
   FileService,
 } from "@/infrastructure/database/db";
+import { storageService } from "@/infrastructure/external-services/storage-service";
 import { logger } from "@/shared/utils/logger";
 
 export async function GET(
@@ -59,7 +60,32 @@ export async function DELETE(
       );
     }
 
-    // Delete both upload and summary records
+    // Get upload record to get S3 key before deletion
+    const uploadRecord = await DocumentService.getUpload(filename);
+
+    if (!uploadRecord) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
+    // Delete from S3 first (if S3 key exists)
+    let s3Deleted = false;
+    if (uploadRecord.s3Key) {
+      try {
+        await storageService.deleteFileByKey(uploadRecord.s3Key);
+        s3Deleted = true;
+        logger.info(
+          `File deleted from S3: ${filename} (key: ${uploadRecord.s3Key})`
+        );
+      } catch (error) {
+        logger.error(
+          `Failed to delete file from S3: ${filename} (key: ${uploadRecord.s3Key})`,
+          error
+        );
+        // Continue with database deletion even if S3 deletion fails
+      }
+    }
+
+    // Delete both upload and summary records from database
     const [uploadDeleted, summaryDeleted] = await Promise.all([
       DocumentService.deleteUpload(filename),
       SummaryService.deleteSummary(filename),
@@ -69,6 +95,7 @@ export async function DELETE(
       message: "File deleted successfully",
       uploadDeleted: !!uploadDeleted,
       summaryDeleted: !!summaryDeleted,
+      s3Deleted,
     });
   } catch (error) {
     logger.error("Error deleting file:", error);
