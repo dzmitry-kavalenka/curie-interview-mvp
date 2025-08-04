@@ -63,18 +63,20 @@ export class StorageService {
     return { url: `/api/files/${filename}`, key: filePath };
   }
 
-  async getLocalFileBuffer(filename: string): Promise<Buffer> {
+  async getFileBuffer(filename: string): Promise<Buffer> {
     if (this.isProduction) {
-      throw new Error("Local file access not available in production");
+      // Get file from S3 in production
+      return await s3Service.getFileBuffer(`uploads/${filename}`);
+    } else {
+      // Get file from local storage in development
+      const filePath = join(this.uploadsDir, filename);
+
+      if (!existsSync(filePath)) {
+        throw new Error("File not found");
+      }
+
+      return await readFile(filePath);
     }
-
-    const filePath = join(this.uploadsDir, filename);
-
-    if (!existsSync(filePath)) {
-      throw new Error("File not found");
-    }
-
-    return await readFile(filePath);
   }
 }
 

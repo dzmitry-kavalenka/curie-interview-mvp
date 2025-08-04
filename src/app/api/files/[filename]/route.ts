@@ -43,7 +43,7 @@ export async function GET(
       return NextResponse.redirect(fileUrl);
     } else {
       // Serve local file in development
-      const fileBuffer = await storageService.getLocalFileBuffer(filename);
+      const fileBuffer = await storageService.getFileBuffer(filename);
 
       return new NextResponse(Buffer.from(fileBuffer), {
         headers: {

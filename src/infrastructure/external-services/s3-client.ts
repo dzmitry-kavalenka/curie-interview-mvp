@@ -77,6 +77,30 @@ export class S3Service {
     }
   }
 
+  async getFileBuffer(key: string): Promise<Buffer> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+
+      const response = await this.client.send(command);
+
+      if (!response.Body) {
+        throw new Error("File not found in S3");
+      }
+
+      // Convert to buffer
+      const arrayBuffer = await response.Body.transformToByteArray();
+      const buffer = Buffer.from(arrayBuffer);
+      logger.info(`File downloaded from S3: ${key}`);
+      return buffer;
+    } catch (error) {
+      logger.error("S3 download error:", error);
+      throw new Error(`Failed to download file from S3: ${error}`);
+    }
+  }
+
   getPublicUrl(key: string): string {
     return `https://${this.bucketName}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${key}`;
   }

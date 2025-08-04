@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     // Get file buffer using storage service
     let pdfBuffer: Buffer;
     try {
-      pdfBuffer = await storageService.getLocalFileBuffer(filename);
+      pdfBuffer = await storageService.getFileBuffer(filename);
     } catch {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
