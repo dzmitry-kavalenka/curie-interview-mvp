@@ -1,10 +1,12 @@
 "use client";
 
+import { AlertCircle } from "lucide-react";
 import { useEffect } from "react";
 
 import { EmptyState } from "@/shared/components/common/empty-state";
 import { ErrorState } from "@/shared/components/common/error-state";
 import { LoadingState } from "@/shared/components/common/loading-state";
+import { MAX_PDF_COUNT } from "@/shared/config/config";
 
 import { useFiles } from "../hooks/use-files";
 
@@ -67,6 +69,19 @@ export function UploadHistory({
 
   return (
     <div className="h-full flex flex-col">
+      {/* MVP Limit Warning */}
+      {files.length >= MAX_PDF_COUNT && (
+        <div className="p-3 bg-yellow-50 border-b border-yellow-200">
+          <div className="flex items-center gap-2 text-yellow-800 text-sm">
+            <AlertCircle className="h-4 w-4" />
+            <span>
+              Maximum files ({MAX_PDF_COUNT}) reached. Delete files to upload
+              more.
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-2">
           {files.map(file => (

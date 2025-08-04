@@ -145,7 +145,7 @@ export function UploadArea({
           Drag and drop a PDF here or click to select a file
         </p>
         <p className="text-muted-foreground text-xs mt-1">
-          Maximum file size: 5MB
+          Maximum file size: 5MB • Maximum files: 5
         </p>
         <input
           type="file"

@@ -27,4 +27,8 @@ export class DocumentService {
   static async deleteUpload(filename: string) {
     return await PDFUploadService.deleteByFilename(filename);
   }
+
+  static async getUploadCount() {
+    return await PDFUploadService.count();
+  }
 }

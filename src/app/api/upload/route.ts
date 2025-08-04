@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { connectDB, DocumentService } from "@/infrastructure/database/db";
 import { storageService } from "@/infrastructure/external-services/storage-service";
+import { MAX_PDF_COUNT } from "@/shared/config/config";
 import { logger } from "@/shared/utils/logger";
 
 // MVP Configuration - Match summarize route limits
@@ -35,6 +36,17 @@ export async function POST(request: NextRequest) {
     if (file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Only PDF files are allowed" },
+        { status: 400 }
+      );
+    }
+
+    // Check current file count before uploading
+    const currentFileCount = await DocumentService.getUploadCount();
+    if (currentFileCount >= MAX_PDF_COUNT) {
+      return NextResponse.json(
+        {
+          error: `Maximum number of PDF files (${MAX_PDF_COUNT}) reached. Please delete some files before uploading new ones.`,
+        },
         { status: 400 }
       );
     }

@@ -84,6 +84,7 @@ export default function Dashboard() {
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Supported format: PDF files only</li>
               <li>• Maximum file size: 5MB</li>
+              <li>• Maximum files: 5 (MVP limit)</li>
               <li>• AI summaries are generated automatically</li>
               <li>• View your upload history on the right panel</li>
             </ul>

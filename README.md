@@ -49,10 +49,16 @@ A modern document management and AI summarization application built with Next.js
 
 ## Features
 
-. **Document Upload & Management** - Upload and manage PDF files
+. **Document Upload & Management** - Upload and manage PDF files (MVP: max 5 files)
 . **AI-Powered Summarization** - Generate intelligent summaries using OpenAI
 . **PDF Text Selection** - Select and copy text with keyboard support
 . **Responsive Design** - Works seamlessly across all devices
+
+## MVP Limitations
+
+. **File Count**: Maximum 5 PDF files
+. **File Size**: Maximum 5MB per PDF file
+. **Text Length**: Maximum 50,000 characters per document for AI processing
 
 ## Technologies
 
