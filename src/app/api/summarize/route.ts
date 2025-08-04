@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if file exists
-    const uploadsDir = join(process.cwd(), "src", "uploads");
+    const uploadsDir =
+      process.env.NODE_ENV === "production"
+        ? "/tmp/uploads"
+        : join(process.cwd(), "uploads");
     const filePath = join(uploadsDir, filename);
 
     if (!existsSync(filePath)) {

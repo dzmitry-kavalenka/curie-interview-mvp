@@ -29,7 +29,10 @@ export async function GET(
       return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
     }
 
-    const uploadsDir = join(process.cwd(), "src", "uploads");
+    const uploadsDir =
+      process.env.NODE_ENV === "production"
+        ? "/tmp/uploads"
+        : join(process.cwd(), "uploads");
     const filePath = join(uploadsDir, filename);
 
     // Check if file exists

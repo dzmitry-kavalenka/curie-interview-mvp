@@ -53,7 +53,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "src", "uploads");
+    const uploadsDir =
+      process.env.NODE_ENV === "production"
+        ? "/tmp/uploads"
+        : join(process.cwd(), "uploads");
+
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }

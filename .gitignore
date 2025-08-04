@@ -44,6 +44,7 @@ next-env.d.ts
 
 # uploads
 /src/uploads
+/uploads
 
 # storage
 src/storage
