@@ -12,3 +12,5 @@ export interface SummaryResponse {
 export interface SummaryError {
   error: string;
 }
+
+export type SummaryApiResponse = SummaryResponse | SummaryError;

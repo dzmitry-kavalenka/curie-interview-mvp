@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { UploadArea } from "@/features/document-management/components/upload-area";
-import { UploadHistory } from "@/features/document-management/components/upload-history";
+import { UploadHistory } from "@/features/document-management/document-history/components/upload-history";
 import { ResizablePanel } from "@/shared/components/layout/resizable-panel";
 
 export default function Dashboard() {

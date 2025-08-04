@@ -12,7 +12,6 @@ export const useTextSelection = (onTextSelect?: (text: string) => void) => {
       if (!selection || !selection.toString().trim()) return;
 
       const selectedText = selection.toString().trim();
-      console.log("Selected text:", selectedText);
 
       // Get more precise mouse position
       if (event instanceof MouseEvent) {

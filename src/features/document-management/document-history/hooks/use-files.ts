@@ -1,4 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+
+import { logger } from "@/shared/utils/logger";
+
+import { fetchUploadsAction, deleteFileAction } from "../actions/documents";
 
 interface UploadRecord {
   _id: string;
@@ -26,50 +31,42 @@ interface FileWithSummary {
   summary: SummaryRecord | null;
 }
 
-/**
- * Hook to manage file uploads and summaries
- * @returns {Object} - Object containing file data, loading state, error, selected file, and functions to fetch, delete, and select files
- */
 export function useFiles() {
   const [files, setFiles] = useState<FileWithSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  const fetchUploads = async () => {
+  const fetchUploads = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const response = await fetch("/api/uploads");
-      if (!response.ok) {
-        throw new Error("Failed to fetch uploads");
-      }
-      const data = await response.json();
-      setFiles(data.files || []);
+      const result = await fetchUploadsAction();
+      setFiles(result.files || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch uploads");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch uploads";
+      setError(errorMessage);
+      logger.error("Error fetching uploads:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const deleteFile = async (filename: string) => {
-    if (!confirm("Are you sure you want to delete this file?")) {
-      return;
-    }
-
     try {
-      const response = await fetch(`/api/uploads/${filename}`, {
-        method: "DELETE",
-      });
+      await deleteFileAction(filename);
 
-      if (!response.ok) {
-        throw new Error("Failed to delete file");
+      setFiles(prev => prev.filter(file => file.upload.filename !== filename));
+      if (selectedFile === filename) {
+        setSelectedFile(null);
       }
-
-      // Refresh the list
-      await fetchUploads();
+      toast.success("File deleted successfully");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete file");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete file";
+      toast.error(errorMessage);
+      logger.error("Error deleting file:", err);
     }
   };
 
@@ -79,7 +76,7 @@ export function useFiles() {
 
   useEffect(() => {
     fetchUploads();
-  }, []);
+  }, [fetchUploads]);
 
   return {
     files,

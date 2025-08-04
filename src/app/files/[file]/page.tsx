@@ -30,7 +30,6 @@ export default function DocumentPage({
   const handleAnnotationCreated = () => {
     // Trigger a refresh of the annotations list
     setRefreshTrigger(prev => prev + 1);
-    console.log("Annotation created!");
   };
 
   if (!file) {
