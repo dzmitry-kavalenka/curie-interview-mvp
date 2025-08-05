@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Upload, History } from "lucide-react";
+import { FileText, Upload, History, Github } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -59,9 +59,18 @@ export default function Dashboard() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
               <Upload className="h-8 w-8 text-blue-600" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              PDF Upload
-            </h1>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <h1 className="text-4xl font-bold text-gray-900">PDF Upload</h1>
+              <a
+                href="https://github.com/dzmitry-kavalenka/curie-interview-mvp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                title="View on GitHub"
+              >
+                <Github className="h-5 w-5 text-gray-600" />
+              </a>
+            </div>
             <p className="text-gray-600 text-lg">
               Upload your PDF file to start a research
             </p>
